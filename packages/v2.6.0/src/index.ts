@@ -123,10 +123,6 @@ export async function up(db: NodePgDatabase<typeof schema>) {
           })
           .where(eq(schema.registrations.id, registrationId));
       }
-
-      await tx.delete(schema.registrationData);
-      await tx.delete(schema.registrationFieldOptions);
-      await tx.delete(schema.registrationFields);
       console.log('v.2.6.0 data migration complete');
     } catch (e) {
       console.error('error running v.2.6.0 data migration', e);

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import assert from 'node:assert';
-import { after, before, describe, it } from 'node:test';
+import test, { after, before, describe } from 'node:test';
 import { up } from '.';
 import { createTestDatabase } from './db';
 import { env } from './env';
@@ -10,22 +10,23 @@ import { dataSchema, fieldsSchema } from './validation';
 
 describe('v2.6.0 ', () => {
   let db: NodePgDatabase<typeof schema>;
-  let teardown: () => Promise<void>;
+  let deleteTestDb: () => Promise<void>;
+
   before(async () => {
     const envVariables = env.parse(process.env);
-    const { dbClient: connClient, teardown: deleteTestDb } = await createTestDatabase({
+    const { dbClient: connClient, teardown } = await createTestDatabase({
       envVariables,
       schema,
     });
     db = drizzle(connClient, { schema });
-    teardown = deleteTestDb;
-  });
-  after(async () => {
-    await teardown();
+    deleteTestDb = teardown;
   });
 
-  it('can migrate data', async () => {
-    // create v2.5.5 data
+  after(async () => {
+    await deleteTestDb();
+  });
+
+  test('can migrate data', async () => {
     // create event
     const eventRows = await db
       .insert(schema.events)

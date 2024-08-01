@@ -2,24 +2,15 @@ import { DrizzleConfig } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { createDbClient } from './create-db-connection';
+import { Client } from 'pg';
 
 export async function runMigrations({
-  database,
-  host,
-  password,
-  user,
-  port,
   schema,
+  client,
 }: {
-  host: string;
-  port?: number;
-  user: string;
-  password: string;
-  database: string;
   schema: DrizzleConfig<Record<string, unknown>>['schema'];
+  client: Client;
 }) {
-  const client = await createDbClient({ database, host, password, user, port });
   const db = drizzle(client, { schema });
   await migrate(db, { migrationsFolder: 'migrations' });
-  await client.end();
 }

@@ -37,18 +37,14 @@ export async function createTestDatabase({
 
   // run migrations
   await runMigrations({
-    database: testDbName,
-    host: envVariables.DATABASE_HOST,
-    password: envVariables.DATABASE_PASSWORD,
-    user: envVariables.DATABASE_USER,
-    port: envVariables.DATABASE_PORT,
     schema,
+    client: newClient,
   });
 
   return {
     dbClient: newClient,
     teardown: async () => {
-      await teardownTestDatabase(dbClient, testDbName);
+      await teardownTestDatabase(newClient, testDbName);
     },
   };
 }
