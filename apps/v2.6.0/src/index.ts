@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { z } from 'zod';
-import * as schema from './schema';
+import * as schema from './db/schema';
 import { dataSchema, fieldsSchema } from './validation';
 
 export async function up(db: NodePgDatabase<typeof schema>) {

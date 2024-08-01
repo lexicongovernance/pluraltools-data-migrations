@@ -3,9 +3,9 @@ import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 import { up } from '.';
-import { createTestDatabase } from '../db';
-import { env } from '../env';
-import * as schema from './schema';
+import { createTestDatabase } from './db';
+import { env } from './env';
+import * as schema from './db/schema';
 import { dataSchema, fieldsSchema } from './validation';
 
 describe('v2.6.0 ', () => {
