@@ -1,16 +1,15 @@
 import { z } from 'zod';
 import { Client } from 'pg';
 import { createDbClient } from './create-db-connection';
-import { runMigrations } from './run-migrations';
 import { env } from '../env';
 import { DrizzleConfig } from 'drizzle-orm';
 
 export async function createTestDatabase({
   envVariables,
-  drizzleConfig,
+  schema,
 }: {
   envVariables: z.infer<typeof env>;
-  drizzleConfig: DrizzleConfig;
+  schema: DrizzleConfig<Record<string, unknown>>['schema'];
 }) {
   const dbClient = await createDbClient({
     database: envVariables.DATABASE_NAME, // Use the original database name here
@@ -42,7 +41,7 @@ export async function createTestDatabase({
     password: envVariables.DATABASE_PASSWORD,
     user: envVariables.DATABASE_USER,
     port: envVariables.DATABASE_PORT,
-    drizzleConfig,
+    schema,
   });
 
   return {

@@ -1,24 +1,12 @@
-import { z } from 'zod';
-import { createDbClient } from '../db/create-db-connection';
-import { env } from '../env';
-import * as schema from './schema';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { dataSchema, fieldsSchema } from './validation';
 import { eq } from 'drizzle-orm';
+import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { z } from 'zod';
+import * as schema from './schema';
+import { dataSchema, fieldsSchema } from './validation';
 
-export async function up() {
+export async function up(db: NodePgDatabase<typeof schema>) {
   console.log('starting v.2.6.0 data migration');
   // start transaction
-  const envVariables = env.parse(process.env);
-  const client = await createDbClient({
-    host: envVariables.DATABASE_HOST,
-    port: envVariables.DATABASE_PORT,
-    user: envVariables.DATABASE_USER,
-    password: envVariables.DATABASE_PASSWORD,
-    database: envVariables.DATABASE_NAME,
-  });
-  const db = drizzle(client, { schema });
-
   await db.transaction(async (tx) => {
     try {
       const oldFields = await tx.query.registrationFields.findMany({
@@ -107,19 +95,23 @@ export async function up() {
 
       // update fields
       for (const [eventId, fields] of Object.entries(fieldsByEventId)) {
+        const parsedFields = fieldsSchema.parse(fields);
+
         await tx
           .update(schema.events)
           .set({
-            fields: fields,
+            fields: parsedFields,
           })
           .where(eq(schema.events.id, eventId));
       }
 
       for (const [registrationId, data] of Object.entries(dataByRegistrationId)) {
+        const parsedData = dataSchema.parse(data);
+
         await tx
           .update(schema.registrations)
           .set({
-            data: data,
+            data: parsedData,
           })
           .where(eq(schema.registrations.id, registrationId));
       }
@@ -134,5 +126,3 @@ export async function up() {
     }
   });
 }
-
-export async function down() {}
