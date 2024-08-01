@@ -1,0 +1,19 @@
+{
+  "name": "pluraltools-data-migrations",
+  "scripts": {
+    "test": "node --import tsx --env-file=.env --test ./src/**/*.spec.ts"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.0.2",
+    "prettier": "^3.3.3",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.32.1"
+  },
+  "engines": {
+    "node": "^20.14.0"
+  }
+}
