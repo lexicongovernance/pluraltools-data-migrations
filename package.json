@@ -1,8 +1,5 @@
 {
   "name": "pluraltools-data-migrations",
-  "scripts": {
-    "test": "node --import tsx --env-file=.env --test ./src/**/*.spec.ts"
-  },
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^22.0.2",

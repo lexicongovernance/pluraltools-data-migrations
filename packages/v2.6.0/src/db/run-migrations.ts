@@ -10,17 +10,17 @@ export async function runMigrations({
   password,
   user,
   port,
-  drizzleConfig,
+  schema,
 }: {
   host: string;
   port?: number;
   user: string;
   password: string;
   database: string;
-  drizzleConfig: DrizzleConfig;
+  schema: DrizzleConfig<Record<string, unknown>>['schema'];
 }) {
   const client = await createDbClient({ database, host, password, user, port });
-  const db = drizzle(client, drizzleConfig);
+  const db = drizzle(client, { schema });
   await migrate(db, { migrationsFolder: 'migrations' });
   await client.end();
 }

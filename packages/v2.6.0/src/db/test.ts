@@ -3,6 +3,7 @@ import { Client } from 'pg';
 import { createDbClient } from './create-db-connection';
 import { env } from '../env';
 import { DrizzleConfig } from 'drizzle-orm';
+import { runMigrations } from './run-migrations';
 
 export async function createTestDatabase({
   envVariables,

@@ -34,6 +34,8 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
 
+  packages/v2.6.0: {}
+
 packages:
 
   '@esbuild/aix-ppc64@0.21.5':
