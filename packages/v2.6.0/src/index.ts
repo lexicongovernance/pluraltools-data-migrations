@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import * as schema from './db/schema';
 import { dataSchema, fieldsSchema } from './validation';
 
@@ -40,21 +40,27 @@ export async function up(db: NodePgDatabase<typeof schema>) {
       // group fields by eventId
       const fieldsByEventId = newFieldsArray.reduce(
         (acc, field) => {
-          if (field.eventId && !acc[field.eventId]) {
-            acc[field.eventId] = [];
+          if (!field.eventId || !field.id) {
+            return acc;
           }
 
-          delete field['eventId'];
+          if (!acc[field.eventId]) {
+            acc[field.eventId] = {};
+          }
 
-          acc[field.eventId!] = [
-            ...(acc[field.eventId!] ?? []),
-            {
-              [field.id]: field,
-            } as z.infer<typeof fieldsSchema>,
-          ];
+          acc[field.eventId]![field.id] = {
+            id: field.id,
+            name: field.name,
+            description: field.description,
+            type: field.type,
+            position: field.position,
+            options: field.options,
+            validation: field.validation,
+          };
+
           return acc;
         },
-        {} as Record<string, z.infer<typeof fieldsSchema>[]>,
+        {} as Record<string, z.infer<typeof fieldsSchema>>,
       );
 
       // setup data in new format with registration id
@@ -72,30 +78,30 @@ export async function up(db: NodePgDatabase<typeof schema>) {
       // group data by registrationId
       const dataByRegistrationId = newDataArray.reduce(
         (acc, data) => {
-          if (!data.registrationId) {
+          if (!data.registrationId || !data.fieldId) {
             return acc;
           }
 
           if (!acc[data.registrationId]) {
-            acc[data.registrationId] = [];
+            acc[data.registrationId] = {};
           }
 
-          delete data['registrationId'];
+          acc[data.registrationId]![data.fieldId] = {
+            fieldId: data.fieldId,
+            value: data.value,
+            type: data.type,
+          };
 
-          acc[data.registrationId!] = [
-            ...(acc[data.registrationId!] ?? []),
-            {
-              [data.fieldId]: data,
-            } as z.infer<typeof dataSchema>,
-          ];
           return acc;
         },
-        {} as Record<string, z.infer<typeof dataSchema>[]>,
+        {} as Record<string, z.infer<typeof dataSchema>>,
       );
 
       // update fields
       for (const [eventId, fields] of Object.entries(fieldsByEventId)) {
-        const parsedFields = fieldsSchema.parse(fields);
+        const parsedFields = fieldsSchema.parse(fields, {
+          path: ['event', eventId],
+        });
 
         await tx
           .update(schema.events)
@@ -106,7 +112,9 @@ export async function up(db: NodePgDatabase<typeof schema>) {
       }
 
       for (const [registrationId, data] of Object.entries(dataByRegistrationId)) {
-        const parsedData = dataSchema.parse(data);
+        const parsedData = dataSchema.parse(data, {
+          path: ['registration', registrationId],
+        });
 
         await tx
           .update(schema.registrations)
@@ -116,12 +124,15 @@ export async function up(db: NodePgDatabase<typeof schema>) {
           .where(eq(schema.registrations.id, registrationId));
       }
 
-      await tx.delete(schema.registrationFields);
       await tx.delete(schema.registrationData);
       await tx.delete(schema.registrationFieldOptions);
+      await tx.delete(schema.registrationFields);
       console.log('v.2.6.0 data migration complete');
     } catch (e) {
       console.error('error running v.2.6.0 data migration', e);
+
+      if (e instanceof ZodError) {
+      }
       await tx.rollback();
     }
   });

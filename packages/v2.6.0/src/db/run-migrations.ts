@@ -1,8 +1,7 @@
+import { DrizzleConfig } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { createDbClient } from './create-db-connection';
-import { DrizzleConfig } from 'drizzle-orm';
 
 export async function runMigrations({
   database,
