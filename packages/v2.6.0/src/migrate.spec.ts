@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
 import assert from 'node:assert';
 import test, { after, before, describe } from 'node:test';
-import { up } from '.';
+import { up } from './migrate';
 import { createTestDatabase } from './db';
 import { env } from './env';
 import * as schema from './db/schema';

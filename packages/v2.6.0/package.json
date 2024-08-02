@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --import tsx --env-file=.env --test ./src/**.spec.ts"
+    "test": "node --import tsx --env-file=.env --test ./src/**.spec.ts",
+    "migrate": "node --import tsx --env-file=.env ./src/index.ts"
   },
   "keywords": [],
   "author": "",
